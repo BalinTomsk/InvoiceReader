@@ -2,7 +2,7 @@ import PyPDF2
 import re
 import csv
 
-# extracting_text.py
+# reader
 from PyPDF2 import PdfFileReader
 
 def process_total(line):
