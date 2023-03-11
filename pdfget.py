@@ -2,7 +2,7 @@ import PyPDF2
 import re
 import csv
 
-# reader
+# extracting_text.py
 from PyPDF2 import PdfFileReader
 
 def process_total(line):
@@ -41,7 +41,7 @@ def text_extractor(pathPdf, pathCsv):
                 data = process_page(page_data, page_count+1)
                 csv_writer.writerow(data) 
                 percent = int((page_count / pages) * 100)
-                with open('P{}.txt'.format(page_count+1), 'w') as f:
+                with open('c:\\temp\\P{}.txt'.format(page_count+1), 'w') as f:
                     f.write(page_data)
                 print('\r{}%'.format(percent), end='')
 
@@ -50,4 +50,5 @@ def text_extractor(pathPdf, pathCsv):
 # Example usage
  
 pdf_text = text_extractor('CLEAN.pdf', 'CLEAN.csv')
+ 
 print('\r100%\ndone')
