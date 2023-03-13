@@ -1,6 +1,7 @@
 import PyPDF2
 import re
 import csv
+import sys
 
 # extracting_text.py
 from PyPDF2 import PdfFileReader
@@ -48,7 +49,24 @@ def text_extractor(pathPdf, pathCsv):
     return 'Done.'
 
 # Example usage
+# 'CLEAN.pdf', 'CLEAN.csv'
  
-pdf_text = text_extractor('CLEAN.pdf', 'CLEAN.csv')
+def main(arg1, arg2):
+    print("Convert from pdf file:", arg1)
+    print("convert to CSV file:", arg2)
+    pdf_text = text_extractor(arg1, arg2)
  
-print('\r100%\ndone')
+    print('\r100%\ndone')
+
+if __name__ == "__main__":
+    # Check if the correct number of arguments were provided
+    if len(sys.argv) != 3:
+        print("Usage: python script.py arg1 arg2")
+        sys.exit(1)
+
+    # Get the command line arguments
+    arg1 = sys.argv[1]
+    arg2 = sys.argv[2]
+
+    # Call the main function with the provided arguments
+    main(arg1, arg2)

@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "c:\\Projects\\pdfreader\\prfpy\\pdfget.py",
+            "args": ["c:\\Projects\\pdfreader\\prfpy\\CLEAN.pdf", "c:\\Projects\\pdfreader\\prfpy\CLEAN.csv"]
+        }
+    ]
+}
