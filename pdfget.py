@@ -2,16 +2,38 @@ import PyPDF2
 import re
 import csv
 import sys
+import builtins
 
 # extracting_text.py
 from PyPDF2 import PdfFileReader
 
+# Long Island City NY 11105$13.83    <==
+# PHONE PHONE
 def process_total(line):
     dollar_index = line.find("$")
     if dollar_index != -1:
         end_index = line.find(" ", dollar_index)
         amount = line[dollar_index + 1:end_index]
     return amount
+
+# DUEPO or JOB#
+# 1787153 11/15/2022                 <==
+def process_invoice(line):
+    return line.split()[0]
+
+# 127367                             <==
+# CLEAN HARBORS ENVIRONMEN
+# TALPAYMENT 
+def process_customer(line):
+    return line
+
+# 9/16/2022 W221567000               <==
+# 127367
+# CLEAN HARBORS ENVIRONMEN
+# TALPAYMENT 
+def process_po(line):
+    return re.sub(r'\d{1,2}/\d{1,2}/\d{4}', '', line)
+
 
 def process_page(page_data, page_count):
     lines = page_data.split('\n')
@@ -20,13 +42,13 @@ def process_page(page_data, page_count):
     customer = ''
     po = ''
     for i in range(len(lines)):
-        if "DUEPO" in lines[i] or "JOB#" in lines[i]:
-            invoice = lines[i+1].split()[0]
+        if "DUEPO" in lines[i] and "JOB#" in lines[i]:
+            invoice = process_invoice(lines[i+1])
         elif "PHONE PHONE" in lines[i]:
             total = process_total(lines[i-1])
         elif "TALPAYMENT" in lines[i]:
-            customer = lines[i-2]
-            po = re.sub(r'\d{1,2}/\d{1,2}/\d{4}', '', lines[i-3])
+            customer = process_customer(lines[i-2])
+            po = process_po(lines[i-3]) 
     return [page_count, customer, po, invoice, total]
 
 def text_extractor(pathPdf, pathCsv):
@@ -40,11 +62,16 @@ def text_extractor(pathPdf, pathCsv):
                 page = pdf_reader.pages[page_count]
                 page_data = page.extract_text()
                 data = process_page(page_data, page_count+1)
+
+                if builtins.__debug__:
+                    print(data)
+
                 csv_writer.writerow(data) 
                 percent = int((page_count / pages) * 100)
                 with open('c:\\temp\\P{}.txt'.format(page_count+1), 'w') as f:
                     f.write(page_data)
                 print('\r{}%'.format(percent), end='')
+ #                break
 
     return 'Done.'
 
