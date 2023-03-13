@@ -4,8 +4,18 @@ import csv
 import sys
 import builtins
 
+from datetime import datetime
+
 # extracting_text.py
 from PyPDF2 import PdfFileReader
+
+# line = '9/16/2022 W221567000'
+def exctract_date(line):
+    match = re.search(r'\d{1,2}/\d{1,2}/\d{4}', line)
+    if match:
+        date_str = match.group()
+        date_obj = datetime.strptime(date_str, '%m/%d/%Y')
+        return date_obj.date()
 
 # Long Island City NY 11105$13.83    <==
 # PHONE PHONE
@@ -34,6 +44,11 @@ def process_customer(line):
 def process_po(line):
     return re.sub(r'\d{1,2}/\d{1,2}/\d{4}', '', line)
 
+# 9/16/2022 W221567000  
+def does_not_contain_date(line):
+    match = re.search(r'\d{1,2}/\d{1,2}/\d{4}', line)
+    if not match:
+        return True
 
 def process_page(page_data, page_count):
     lines = page_data.split('\n')
@@ -41,20 +56,23 @@ def process_page(page_data, page_count):
     total = ''
     customer = ''
     po = ''
+    invoice_date = ''
     for i in range(len(lines)):
-        if "DUEPO" in lines[i] and "JOB#" in lines[i]:
-            invoice = process_invoice(lines[i+1])
-            if customer == '':
-                customer = process_customer(lines[i-3])
-                po = process_po(lines[i-4]) 
-        elif "PHONE PHONE" in lines[i]:
+        if "PHONE PHONE" in lines[i]:
             total = process_total(lines[i-1])
         elif "TALPAYMENT" in lines[i] and "ENVIRONMENTALPAYMENT" not in lines[i]:
             customer = process_customer(lines[i-2])
+            invoice_date = exctract_date(lines[i-3])
             po = process_po(lines[i-3]) 
-        elif "ENVIRONMENTALPAYMENT" in lines[i]:
-            customer = process_customer(lines[i-1])
-            po = process_po(lines[i-2])     
+        elif "DUEPO or JOB#" in lines[i]:
+            invoice = process_invoice(lines[i+1])
+            if  invoice_date == '':
+                customer = process_customer(lines[i-2])
+                po_text = lines[i-3]
+                if does_not_contain_date(po_text):
+                    po_text = lines[i-4]+lines[i-3]
+                po = process_po(po_text)
+
     return [page_count, customer, po, invoice, total]
 
 def text_extractor(pathPdf, pathCsv):
