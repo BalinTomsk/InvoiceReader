@@ -50,6 +50,13 @@ def does_not_contain_date(line):
     if not match:
         return True
 
+def is_not_number(string):
+    try:
+        float(string)
+        return False
+    except ValueError:
+        return True
+    
 def process_page(page_data, page_count):
     lines = page_data.split('\n')
     invoice = ''
@@ -57,6 +64,8 @@ def process_page(page_data, page_count):
     customer = ''
     po = ''
     invoice_date = ''
+    if page_count == 53:
+        invoice_date = ''
     for i in range(len(lines)):
         if "PHONE PHONE" in lines[i]:
             total = process_total(lines[i-1])
@@ -67,10 +76,13 @@ def process_page(page_data, page_count):
         elif "DUEPO or JOB#" in lines[i]:
             invoice = process_invoice(lines[i+1])
             if  invoice_date == '':
-                customer = process_customer(lines[i-2])
-                po_text = lines[i-3]
+                iter = i-2
+                if is_not_number(lines[iter]):
+                    iter = iter - 1
+                customer = process_customer(lines[iter])
+                po_text = lines[iter-1]
                 if does_not_contain_date(po_text):
-                    po_text = lines[i-4]+lines[i-3]
+                    po_text = lines[iter-2]+lines[iter-1]
                 po = process_po(po_text)
 
     return [page_count, customer, po, invoice, total]
