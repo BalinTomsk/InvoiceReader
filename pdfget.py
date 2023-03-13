@@ -44,11 +44,17 @@ def process_page(page_data, page_count):
     for i in range(len(lines)):
         if "DUEPO" in lines[i] and "JOB#" in lines[i]:
             invoice = process_invoice(lines[i+1])
+            if customer == '':
+                customer = process_customer(lines[i-3])
+                po = process_po(lines[i-4]) 
         elif "PHONE PHONE" in lines[i]:
             total = process_total(lines[i-1])
-        elif "TALPAYMENT" in lines[i]:
+        elif "TALPAYMENT" in lines[i] and "ENVIRONMENTALPAYMENT" not in lines[i]:
             customer = process_customer(lines[i-2])
             po = process_po(lines[i-3]) 
+        elif "ENVIRONMENTALPAYMENT" in lines[i]:
+            customer = process_customer(lines[i-1])
+            po = process_po(lines[i-2])     
     return [page_count, customer, po, invoice, total]
 
 def text_extractor(pathPdf, pathCsv):
@@ -71,7 +77,8 @@ def text_extractor(pathPdf, pathCsv):
                 with open('c:\\temp\\P{}.txt'.format(page_count+1), 'w') as f:
                     f.write(page_data)
                 print('\r{}%'.format(percent), end='')
- #                break
+                if page_count > 9999999:
+                     break
 
     return 'Done.'
 
